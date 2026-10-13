@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="0.5" stop-color="#2A63C4" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="slab" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#232936"/>
+      <stop offset="1" stop-color="#11161D"/>
+    </linearGradient>
+    <linearGradient id="axle" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#60A0FF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#9CC2FF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#60A0FF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0"/>
+    </filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#ffffff" stroke-opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="720" fill="#0D1117"/>
+  <rect width="1280" height="720" fill="url(#grid)"/>
+  <rect width="1280" height="720" filter="url(#grain)"/>
+
+  <!-- lane marking running through the asphalt -->
+  <g fill="#B8C0CE" fill-opacity="0.22">
+    <rect x="636" y="-10" width="8" height="90"/><rect x="636" y="120" width="8" height="90"/>
+    <rect x="636" y="510" width="8" height="90"/><rect x="636" y="640" width="8" height="90"/>
+  </g>
+
+  <ellipse cx="640" cy="360" rx="560" ry="330" fill="url(#glow)"/>
+
+  <!-- impact ripples from the axle event -->
+  <g fill="none" stroke="#60A0FF">
+    <circle cx="640" cy="360" r="250" stroke-opacity="0.10" stroke-width="2"/>
+    <circle cx="640" cy="360" r="300" stroke-opacity="0.07" stroke-width="2"/>
+    <circle cx="640" cy="360" r="350" stroke-opacity="0.045" stroke-width="2"/>
+  </g>
+
+  <!-- traces out to the controller (right) and a second sensor (left) -->
+  <g fill="none" stroke="#60A0FF" stroke-opacity="0.65" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M860 330 H980 V250 H1090"/>
+    <path d="M860 390 H1010 V470 H1090"/>
+    <path d="M420 330 H300 V250 H200"/>
+    <path d="M420 390 H270 V470 H200"/>
+  </g>
+  <g fill="#0D1117" stroke="#60A0FF" stroke-width="2.5">
+    <circle cx="980" cy="330" r="6"/><circle cx="1010" cy="390" r="6"/>
+    <circle cx="300" cy="330" r="6"/><circle cx="270" cy="390" r="6"/>
+  </g>
+
+  <!-- controller board -->
+  <g>
+    <rect x="1090" y="210" width="130" height="300" rx="10" fill="#171B22" stroke="#2C3341" stroke-width="2"/>
+    <rect x="1112" y="262" width="86" height="86" rx="6" fill="#0D1117" stroke="#3B82F6" stroke-opacity="0.7"/>
+    <rect x="1128" y="278" width="54" height="54" rx="3" fill="none" stroke="#60A0FF" stroke-opacity="0.5"/>
+    <g stroke="#60A0FF" stroke-opacity="0.55"><path d="M1112 282H1100M1112 300H1100M1112 318H1100M1112 336H1100M1198 282H1210M1198 300H1210M1198 318H1210M1198 336H1210"/></g>
+    <circle cx="1136" cy="440" r="5" fill="#3FAE79"/><circle cx="1160" cy="440" r="5" fill="#3B82F6"/>
+    <circle cx="1136" cy="440" r="14" fill="#3FAE79" fill-opacity="0.35" filter="url(#bloom)"/>
+    <text x="1155" y="236" fill="#A6B0C0" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="15" text-anchor="middle">ESP32</text>
+  </g>
+  <g>
+    <rect x="60" y="210" width="130" height="300" rx="10" fill="#171B22" stroke="#2C3341" stroke-width="2"/>
+    <rect x="92" y="262" width="66" height="86" rx="6" fill="#0D1117" stroke="#7C8AA5" stroke-opacity="0.7"/>
+    <text x="125" y="236" fill="#A6B0C0" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="15" text-anchor="middle">sensor B</text>
+  </g>
+
+  <!-- the pavement panel, with its layer stack drawn as nested insets -->
+  <rect x="420" y="150" width="440" height="420" rx="22" fill="url(#slab)" stroke="#3a4254" stroke-width="2"/>
+  <rect x="420" y="150" width="440" height="420" rx="22" fill="none" stroke="#fff" stroke-opacity="0.06" stroke-width="1" transform="translate(0 1)"/>
+  <rect x="446" y="176" width="388" height="368" rx="14" fill="#0D1117" stroke="#9CAAC4" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="6 6"/>
+  <rect x="472" y="202" width="336" height="316" rx="10" fill="#101824" stroke="#3B82F6" stroke-opacity="0.8" stroke-width="2.5"/>
+  <!-- piezo fibers -->
+  <g stroke="#3B82F6" stroke-opacity="0.35" stroke-width="2">
+    <path d="M492 232H788M492 262H788M492 292H788M492 422H788M492 452H788M492 482H788"/>
+  </g>
+  <g fill="none" stroke="#9CAAC4" stroke-opacity="0.5" stroke-width="2">
+    <path d="M492 322Q540 304 588 322T684 322T780 322"/>
+    <path d="M492 360Q540 342 588 360T684 360T780 360"/>
+    <path d="M492 398Q540 380 588 398T684 398T780 398"/>
+  </g>
+
+  <!-- the axle event: a bright line sweeping across the stack -->
+  <rect x="400" y="352" width="480" height="16" fill="url(#axle)" filter="url(#bloom)" opacity="0.9"/>
+  <rect x="420" y="357" width="440" height="6" rx="3" fill="url(#axle)"/>
+
+  <text x="446" y="140" fill="#A6B0C0" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="15">piezo + tribo stack</text>
+  <text x="446" y="602" fill="#6B7383" font-family="ui-monospace, Menlo, Consolas, monospace" font-size="15">axle event</text>
+</svg>

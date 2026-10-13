@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Zap, Radio, Gauge, ShieldCheck, Github, ArrowUpRight, Trophy, Activity, Target, BatteryCharging, Wifi, Layers } from "lucide-react";
-import { PageHeader } from "@/components/ui/PageHeader";
+import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { Badge } from "@/components/ui/Badge";
@@ -41,32 +41,52 @@ const metrics = [
 export default function UrbanPulsePage() {
   return (
     <>
-      <div className="relative">
-        <MeshGradient variant="product" className="-z-10" />
-        <PageHeader eyebrow="Featured Project" title={featuredProject.title} description={featuredProject.description}>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button href="#gallery" variant="secondary">View media</Button>
-            <Button href={`https://${featuredProject.repoPlaceholder}`} variant="ghost" external icon={<Github className="h-4 w-4" />}>
-              Repository
-            </Button>
-            <span className="font-mono text-[12px] text-signal">{featuredProject.status}</span>
-          </div>
+      {/* Cinematic opener — the first scroll expands the prototype to full screen,
+          then the project summary below is revealed. Swap the two /images paths
+          for real photographs of the build when you have them. */}
+      <ScrollExpandMedia
+        mediaType="image"
+        mediaSrc="/images/urban-pulse-panel.svg"
+        bgImageSrc="/images/urban-pulse-backdrop.svg"
+        mediaAlt="Diagram of the Urban Pulse panel: a piezoelectric and triboelectric layer stack with an axle event passing through it, wired to an ESP32 controller."
+        title={featuredProject.title}
+        date={featuredProject.achievements?.[0]}
+        scrollToExpand="Scroll to expand"
+      >
+        <div className="relative">
+          <MeshGradient variant="product" className="-z-10" />
+          <div className="container-page relative pb-12 pt-2 md:pt-6">
+            <p className="text-balance max-w-2xl font-display text-2xl font-semibold leading-[1.2] text-paper md:text-4xl">
+              {featuredProject.tagline}
+            </p>
+            <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-paper-muted md:text-base">
+              {featuredProject.description}
+            </p>
 
-          <div className="pointer-events-none absolute right-10 top-16 hidden w-[220px] xl:block">
-            <SpatialPanel
-              title="Urban Pulse — Live"
-              icon={<Activity className="h-3.5 w-3.5 text-signal" />}
-              depth={0.6}
-              rows={[
-                { label: "Vehicle Status", value: "Detected", tone: "signal", live: true },
-                { label: "Energy Harvested", value: "18 mJ", tone: "success" },
-                { label: "Sensor Status", value: "Healthy", tone: "success" },
-                { label: "Wireless", value: "Connected" },
-              ]}
-            />
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Button href="#gallery" variant="secondary">View media</Button>
+              <Button href={`https://${featuredProject.repoPlaceholder}`} variant="ghost" external icon={<Github className="h-4 w-4" />}>
+                Repository
+              </Button>
+              <span className="font-mono text-[12px] text-signal">{featuredProject.status}</span>
+            </div>
+
+            <div className="pointer-events-none absolute right-10 top-2 hidden w-[220px] xl:block">
+              <SpatialPanel
+                title="Urban Pulse — Live"
+                icon={<Activity className="h-3.5 w-3.5 text-signal" />}
+                depth={0.6}
+                rows={[
+                  { label: "Vehicle Status", value: "Detected", tone: "signal", live: true },
+                  { label: "Energy Harvested", value: "18 mJ", tone: "success" },
+                  { label: "Sensor Status", value: "Healthy", tone: "success" },
+                  { label: "Wireless", value: "Connected" },
+                ]}
+              />
+            </div>
           </div>
-        </PageHeader>
-      </div>
+        </div>
+      </ScrollExpandMedia>
 
       {/* Product-page tab nav — jumps to each section below, Apple OS-switcher style */}
       <ProductTabs />
