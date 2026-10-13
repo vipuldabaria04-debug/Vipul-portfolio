@@ -187,3 +187,20 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Homepage intro — see components/layout/IntroGate.tsx */
+html[data-intro="skip"] #intro-gate {
+  display: none !important;
+}
+/* If the page's JavaScript never starts, don't leave visitors stuck behind the intro. */
+#intro-gate:not([data-engaged]) {
+  animation: intro-failsafe 0.01s linear 10s forwards;
+}
+@keyframes intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

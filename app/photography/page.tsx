@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/ui/PageHeader";
+import ScrollMorphHero from "@/components/ui/scroll-morph-hero";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 import { FigureFrame } from "@/components/ui/FigureFrame";
@@ -14,16 +14,21 @@ export const metadata: Metadata = {
 export default function PhotographyPage() {
   return (
     <>
+      {/* Scroll-driven opener: the frames assemble into a circle, then open into an arc
+          you sweep through by scrolling. Real page scroll — nothing is intercepted. */}
       <div className="relative">
         <MeshGradient variant="research" className="-z-10" />
-        <PageHeader
+        <ScrollMorphHero
+          photos={photos.map(({ src, caption, location }) => ({ src, caption, location }))}
+          introTitle="What I notice when I'm not building."
+          introHint="Scroll to explore"
           eyebrow="Photography"
-          title="What I notice when I'm not building."
-          description="Frames from substations, plants, campuses, and the odd quiet moment in between — the least structured gallery on the site, and the best home for anything that doesn't fit a specific story elsewhere."
+          arcTitle="Frames from the field"
+          arcDescription="Substations, plants, campuses, and the quiet moments in between. Hover or tap a frame to read its caption."
         />
       </div>
 
-      <Section>
+      <Section id="photo-grid">
         <div className="columns-1 gap-6 sm:columns-2 lg:columns-3">
           {photos.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 0.05} className="mb-6 break-inside-avoid">
@@ -32,6 +37,7 @@ export default function PhotographyPage() {
                 caption={p.caption}
                 location={p.location}
                 ratio={i % 3 === 0 ? "aspect-[3/4]" : "aspect-[4/3]"}
+                src={p.src}
               />
             </Reveal>
           ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, FileDown, Zap, Flame } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -7,20 +8,26 @@ import { FloatingParticles } from "@/components/ui/FloatingParticles";
 import { SpatialPanel } from "@/components/ui/SpatialPanel";
 import { MeshGradient } from "@/components/ui/MeshGradient";
 import { ScrollCue } from "@/components/ui/ScrollCue";
+import { HeroScene } from "@/components/sections/HeroScene";
 import { site } from "@/data/site";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
+  // True once the 3D scene has loaded and is showing (desktop only).
+  const [sceneReady, setSceneReady] = useState(false);
+
   return (
     <section className="relative overflow-hidden pb-24 pt-40 md:pb-32 md:pt-48">
       <MeshGradient variant="default" />
       <div className="schematic-bg absolute inset-0 -z-10" />
       <FloatingParticles count={18} />
+      <HeroScene onReadyChange={setSceneReady} />
 
       {/* Spatial instrument panels — a quiet nod to the two grids this work has run on */}
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ opacity: sceneReady ? 0 : 1, scale: 1 }}
+        transition={sceneReady ? { duration: 0.8 } : { duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="pointer-events-none absolute right-6 top-32 hidden w-[190px] lg:right-10 lg:block xl:w-[210px]"
       >
         <SpatialPanel
@@ -39,8 +46,8 @@ export function Hero() {
 
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ opacity: sceneReady ? 0 : 1, scale: 1 }}
+        transition={sceneReady ? { duration: 0.8 } : { duration: 1, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="pointer-events-none absolute right-16 top-[26rem] hidden w-[190px] lg:block xl:right-24 xl:w-[210px]"
       >
         <SpatialPanel
@@ -57,7 +64,7 @@ export function Hero() {
         />
       </motion.div>
 
-      <div className="container-page">
+      <div className={cn("container-page relative z-10", sceneReady && "pointer-events-none")}>
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,7 +81,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 max-w-4xl text-[2.6rem] font-semibold leading-[1.06] text-paper sm:text-6xl md:text-7xl"
+          className="mt-8 max-w-4xl text-[2.6rem] font-semibold leading-[1.06] text-paper sm:text-6xl md:text-7xl lg:max-w-[8.8em] lg:text-[3.4rem] xl:text-6xl 2xl:text-[4rem]"
         >
           I build the wires<br />
           between <span className="text-signal">physics</span> and{" "}
@@ -85,7 +92,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-7 max-w-xl text-[16px] leading-relaxed text-paper-muted md:text-lg"
+          className="mt-7 max-w-xl text-[16px] leading-relaxed text-paper-muted md:text-lg lg:max-w-[28rem]"
         >
           {site.description}
         </motion.p>
@@ -94,7 +101,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 flex flex-wrap items-center gap-4"
+          className="pointer-events-auto mt-10 flex flex-wrap items-center gap-4"
         >
           <Button href="/projects/urban-pulse" icon={<ArrowUpRight className="h-4 w-4" />}>
             View Urban Pulse
@@ -108,7 +115,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="mt-20 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-line pt-8"
+          className="mt-20 flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-line pt-8 lg:mt-14 lg:max-w-[calc(50%-1rem)]"
         >
           {[
             "RTU, Kota — B.Tech EE",

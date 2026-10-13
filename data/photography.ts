@@ -2,6 +2,9 @@ export type PhotoEntry = {
   id: string;
   caption: string;
   location: string;
+  /** Add the file under public/images/photography/ and set e.g. "/images/photography/switchyard.jpg".
+   *  Leave unset to show the placeholder frame. */
+  src?: string;
 };
 
 export const photos: PhotoEntry[] = [

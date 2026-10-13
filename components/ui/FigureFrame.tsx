@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ImageIcon, PlayCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ export function FigureFrame({
   className,
   priority = false,
   kind = "photo",
+  src,
 }: {
   /** e.g. "01" — rendered as "Fig. 01" */
   figureNumber: string;
@@ -20,12 +22,16 @@ export function FigureFrame({
   className?: string;
   priority?: boolean;
   kind?: "photo" | "video";
+  /** A real photograph. When omitted, the "pending" placeholder frame is shown. */
+  src?: string;
 }) {
   return (
     <figure className={cn("group relative", className)}>
       <div
         className={cn(
-          "zoom-frame schematic-bg relative overflow-hidden rounded-2xl border border-line bg-ink-850",
+          "zoom-frame relative overflow-hidden rounded-2xl border border-line bg-ink-850",
+          // the grid texture is masked, so it is only applied to the placeholder
+          !src && "schematic-bg",
           ratio,
           priority ? "shadow-elevated" : "shadow-soft"
         )}
@@ -43,14 +49,25 @@ export function FigureFrame({
           </span>
         )}
 
-        <div className="flex h-full w-full items-center justify-center">
-          <div className="flex flex-col items-center gap-2 text-paper-faint">
-            {kind === "video" ? <PlayCircle className="h-6 w-6" /> : <ImageIcon className="h-6 w-6" />}
-            <span className="max-w-[220px] text-center font-mono text-[10.5px] uppercase tracking-wide">
-              {kind === "video" ? "Footage pending" : "Photo pending"}
-            </span>
+        {src ? (
+          <Image
+            src={src}
+            alt={caption}
+            fill
+            sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+            priority={priority}
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="flex flex-col items-center gap-2 text-paper-faint">
+              {kind === "video" ? <PlayCircle className="h-6 w-6" /> : <ImageIcon className="h-6 w-6" />}
+              <span className="max-w-[220px] text-center font-mono text-[10.5px] uppercase tracking-wide">
+                {kind === "video" ? "Footage pending" : "Photo pending"}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <figcaption className="mt-3 flex items-baseline gap-3">
         <span className="shrink-0 font-mono text-[11px] text-signal">Fig. {figureNumber}</span>

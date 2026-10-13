@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { CursorGlow } from "@/components/layout/CursorGlow";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { IntroGate } from "@/components/layout/IntroGate";
+import { INTRO_SKIP_SCRIPT } from "@/lib/intro";
 import { site } from "@/data/site";
 
 const instrumentSans = Instrument_Sans({
@@ -64,8 +66,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${instrumentSans.variable} ${inter.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${instrumentSans.variable} ${inter.variable} ${plexMono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Marks <html> before first paint so a repeat visitor never sees the intro flash */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SKIP_SCRIPT }} />
+        <noscript>
+          <style>{`#intro-gate{display:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="relative min-h-screen bg-ink-950">
+        <IntroGate />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-signal focus:px-4 focus:py-2 focus:text-white focus:font-medium"
