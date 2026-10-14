@@ -6,7 +6,7 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { ExperienceTimeline } from "@/components/sections/ExperienceTimeline";
 import { Leadership } from "@/components/sections/Leadership";
 import { FeaturedProjectSection } from "@/components/sections/FeaturedProjectSection";
-import { SkillsConstellation } from "@/components/sections/SkillsConstellation";
+import { SkillsMorph } from "@/components/sections/SkillsMorph";
 import { AchievementsGrid } from "@/components/sections/AchievementsGrid";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { SchematicDivider } from "@/components/ui/SchematicDivider";
@@ -44,10 +44,10 @@ export default function HomePage() {
         <FeaturedProjectSection />
       </Section>
 
-      <Section id="skills">
-        <SectionHeading eyebrow="Toolkit" title="What I build with." />
-        <SkillsConstellation />
-      </Section>
+      {/* Scroll-driven toolkit: the cards assemble into a circle, then open into an arc. */}
+      <section id="skills" aria-label="Toolkit — what I build with">
+        <SkillsMorph />
+      </section>
 
       <Section id="achievements">
         <SectionHeading eyebrow="Recognition" title="Selected achievements." />

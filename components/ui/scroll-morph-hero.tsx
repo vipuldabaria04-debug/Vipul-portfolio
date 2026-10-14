@@ -22,6 +22,10 @@ export interface MorphPhoto {
   src?: string;
   caption: string;
   location?: string;
+  /** Text-card mode (no photo): the big line on the card front, e.g. a skill name. */
+  label?: string;
+  /** Small mono line above the label, e.g. its category. */
+  tag?: string;
 }
 
 interface ScrollMorphHeroProps {
@@ -34,13 +38,26 @@ interface ScrollMorphHeroProps {
   arcTitle: string;
   arcDescription?: string;
   className?: string;
+  /** Card size in px before the arc scales it up. Photos: 84×118. Text cards read better wider. */
+  cardWidth?: number;
+  cardHeight?: number;
+  /** Extra page scroll (px) the section occupies. Longer = slower sweep. */
+  scrollLength?: number;
+  /** Lift the card at the centre of the arc to the front, so dense arcs stay readable. */
+  focusCenter?: boolean;
+  /** Card scale on the arc (desktop). Larger = bigger cards. Default 1.9. */
+  arcScale?: number;
+  /** How far below the stage's centre the arc's highest point sits, as a fraction of its height. Default 0.22. */
+  arcApex?: number;
+  /** Use "h2" when the page already has its own h1 (the arc title then becomes an h3). */
+  headingLevel?: "h1" | "h2";
 }
 
 // --- Layout constants ---
-const CARD_W = 84;
-const CARD_H = 118;
+const DEFAULT_CARD_W = 84;
+const DEFAULT_CARD_H = 118;
 /** Extra page scroll (px) the section occupies. 0–600 morphs, the rest shuffles. */
-const MAX_SCROLL = 2400;
+const DEFAULT_SCROLL_LENGTH = 2400;
 const MORPH_END = 600;
 
 const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * t;
@@ -62,8 +79,24 @@ interface FlipCardProps {
   photo: MorphPhoto;
   index: number;
   total: number;
-  target: { x: number; y: number; rotation: number; scale: number; opacity: number };
+  target: { x: number; y: number; rotation: number; scale: number; opacity: number; focus?: boolean };
   instant: boolean;
+  width: number;
+  height: number;
+}
+
+function TextFace({ photo, index }: { photo: MorphPhoto; index: number }) {
+  const tints = ["from-ink-750 via-ink-800 to-ink-850", "from-ink-700 via-ink-800 to-ink-900", "from-ink-800 via-ink-750 to-ink-800"];
+  return (
+    <div className={cn("relative flex h-full w-full flex-col justify-between bg-gradient-to-br p-2.5", tints[index % tints.length])}>
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{ background: "radial-gradient(circle at 85% 0%, rgba(59,130,246,0.22), transparent 60%)" }}
+      />
+      <span className="relative line-clamp-2 font-mono text-[6.5px] uppercase leading-tight tracking-wider text-signal">{photo.tag}</span>
+      <span className="relative break-words font-display text-[11px] font-semibold leading-[1.15] text-paper">{photo.label}</span>
+    </div>
+  );
 }
 
 function PlaceholderTile({ index }: { index: number }) {
@@ -93,7 +126,7 @@ function PlaceholderTile({ index }: { index: number }) {
   );
 }
 
-function FlipCard({ photo, index, total, target, instant }: FlipCardProps) {
+function FlipCard({ photo, index, total, target, instant, width, height }: FlipCardProps) {
   const [flipped, setFlipped] = useState(false);
 
   return (
@@ -115,11 +148,11 @@ function FlipCard({ photo, index, total, target, instant }: FlipCardProps) {
       onBlur={() => setFlipped(false)}
       style={{
         position: "absolute",
-        width: CARD_W,
-        height: CARD_H,
+        width,
+        height,
         transformStyle: "preserve-3d",
         perspective: "1000px",
-        zIndex: flipped ? 50 : index,
+        zIndex: flipped ? 50 : target.focus ? 30 : index,
       }}
       className="rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950"
     >
@@ -136,6 +169,8 @@ function FlipCard({ photo, index, total, target, instant }: FlipCardProps) {
         >
           {photo.src ? (
             <Image src={photo.src} alt="" fill sizes="170px" className="object-cover" />
+          ) : photo.label ? (
+            <TextFace photo={photo} index={index} />
           ) : (
             <PlaceholderTile index={index} />
           )}
@@ -146,7 +181,9 @@ function FlipCard({ photo, index, total, target, instant }: FlipCardProps) {
           className="absolute inset-0 flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-ink-900 p-2.5 shadow-elevated"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          <span className="font-mono text-[8px] text-signal">Fig. {String(index + 1).padStart(2, "0")}</span>
+          <span className="font-mono text-[8px] text-signal">
+            {photo.label ? `${String(index + 1).padStart(2, "0")} / ${total}` : `Fig. ${String(index + 1).padStart(2, "0")}`}
+          </span>
           <div>
             <p className="text-[9px] font-medium leading-snug text-paper">{photo.caption}</p>
             {photo.location && (
@@ -176,7 +213,18 @@ export default function ScrollMorphHero({
   arcTitle,
   arcDescription,
   className,
+  cardWidth = DEFAULT_CARD_W,
+  cardHeight = DEFAULT_CARD_H,
+  scrollLength = DEFAULT_SCROLL_LENGTH,
+  focusCenter = false,
+  arcScale: arcScaleProp = 1.9,
+  arcApex = 0.22,
+  headingLevel = "h1",
 }: ScrollMorphHeroProps) {
+  const CARD_W = cardWidth;
+  const MAX_SCROLL = scrollLength;
+  const IntroHeading = headingLevel === "h1" ? motion.h1 : motion.h2;
+  const ArcHeading = headingLevel === "h1" ? "h2" : "h3";
   const reduceMotion = useReducedMotion();
   const total = photos.length;
 
@@ -306,15 +354,18 @@ export default function ScrollMorphHero({
     };
 
     // B. Arc — a rainbow along the bottom of the stage
+    const arcScale = isMobile ? arcScaleProp * 0.85 : arcScaleProp;
+    const maxSpread = isMobile ? 120 : 150;
     const baseRadius = Math.min(containerSize.width, containerSize.height * 1.5);
-    const arcRadius = baseRadius * (isMobile ? 1.4 : 1.1);
-    const arcApexY = containerSize.height * (isMobile ? 0.06 : 0.22);
+    // Many cards need a wider, flatter arc so they don't pile on top of each other.
+    const neededRadius = (CARD_W * arcScale * 1.12 * Math.max(total - 1, 1)) / ((maxSpread * Math.PI) / 180);
+    const arcRadius = Math.max(baseRadius * (isMobile ? 1.4 : 1.1), neededRadius);
+    const arcApexY = containerSize.height * (isMobile ? Math.min(arcApex, 0.06) : arcApex);
     const arcCenterY = arcApexY + arcRadius;
-    const arcScale = isMobile ? 1.6 : 1.9;
 
     // Space the cards by their own width so any number of photos sits evenly.
     const stepDeg = (((CARD_W * arcScale * 1.45) / arcRadius) * 180) / Math.PI;
-    const spreadAngle = Math.min(stepDeg * Math.max(total - 1, 1), isMobile ? 120 : 150);
+    const spreadAngle = Math.min(stepDeg * Math.max(total - 1, 1), maxSpread);
     const startAngle = -90 - spreadAngle / 2;
     const step = total > 1 ? spreadAngle / (total - 1) : 0;
 
@@ -330,11 +381,12 @@ export default function ScrollMorphHero({
 
     const currentArcAngle = startAngle + i * step + boundedRotation;
     const arcRad = (currentArcAngle * Math.PI) / 180;
+    const focus = focusCenter && Math.abs(currentArcAngle + 90) < Math.max(step, 1) / 2;
     const arcPos = {
       x: Math.cos(arcRad) * arcRadius + parallaxValue,
       y: Math.sin(arcRad) * arcRadius + arcCenterY,
       rotation: currentArcAngle + 90,
-      scale: arcScale,
+      scale: focus ? arcScale * 1.18 : arcScale,
     };
 
     // C. Morph between the two
@@ -344,6 +396,7 @@ export default function ScrollMorphHero({
       rotation: lerp(circlePos.rotation, arcPos.rotation, morphValue),
       scale: lerp(1, arcPos.scale, morphValue),
       opacity: 1,
+      focus: focus && morphValue > 0.9,
     };
   };
 
@@ -362,7 +415,7 @@ export default function ScrollMorphHero({
         <div className="flex h-full w-full flex-col items-center justify-center">
           {/* Intro text — fades out as the cards start to move */}
           <div className="pointer-events-none absolute top-1/2 z-0 flex -translate-y-1/2 flex-col items-center justify-center px-6 text-center">
-            <motion.h1
+            <IntroHeading
               initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
               animate={
                 introVisible
@@ -373,7 +426,7 @@ export default function ScrollMorphHero({
               className="text-balance max-w-3xl font-display text-3xl font-semibold leading-[1.1] tracking-tight text-paper md:text-5xl"
             >
               {introTitle}
-            </motion.h1>
+            </IntroHeading>
             {introHint && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -392,9 +445,9 @@ export default function ScrollMorphHero({
             className="pointer-events-none absolute top-[15%] z-10 flex flex-col items-center justify-center px-6 text-center"
           >
             {eyebrow && <p className="eyebrow mb-4">{eyebrow}</p>}
-            <h2 className="text-balance max-w-2xl font-display text-3xl font-semibold leading-[1.1] tracking-tight text-paper md:text-5xl">
+            <ArcHeading className="text-balance max-w-2xl font-display text-3xl font-semibold leading-[1.1] tracking-tight text-paper md:text-5xl">
               {arcTitle}
-            </h2>
+            </ArcHeading>
             {arcDescription && (
               <p className="mt-4 max-w-lg text-sm leading-relaxed text-paper-muted md:text-base">
                 {arcDescription}
@@ -412,6 +465,8 @@ export default function ScrollMorphHero({
                 total={total}
                 target={targetFor(i)}
                 instant={!!reduceMotion}
+                width={cardWidth}
+                height={cardHeight}
               />
             ))}
           </div>
